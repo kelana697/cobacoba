@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OFFICEVERSE 3D – PT Nusantara Digital</title>
+<style>
+:root{--bg:#E8EDF4;--panel:#FFFFFF;--line:#CBD5E1;--ink:#101827;--mute:#64748B;--accent:#2563EB;--ai:#FFFFFF;--ok:#15803D;--bad:#B91C1C;--chip:#E2E8F0;--hud:rgba(255,255,255,.88);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101827;--panel:#172033;--line:#2B3A55;--ink:#F8FAFC;--mute:#94A3B8;--accent:#38BDF8;--ai:#0B1220;--ok:#22C55E;--bad:#EF4444;--chip:#22304A;--hud:rgba(16,24,39,.82)}}
+:root[data-theme="dark"]{--bg:#101827;--panel:#172033;--line:#2B3A55;--ink:#F8FAFC;--mute:#94A3B8;--accent:#38BDF8;--ai:#0B1220;--ok:#22C55E;--bad:#EF4444;--chip:#22304A;--hud:rgba(16,24,39,.82)}
+html,body{height:100%;margin:0;overflow:hidden}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab}
+.hud{position:fixed;background:var(--hud);border:1px solid var(--line);border-radius:10px;padding:8px 14px;backdrop-filter:blur(6px)}
+#top{top:calc(10px + env(safe-area-inset-top,0px));left:10px;display:flex;gap:14px;align-items:center}
+#obj{top:calc(10px + env(safe-area-inset-top,0px));right:10px;max-width:300px;font-size:14px}
+#obj small{color:var(--mute);display:block}
+#pr{left:50%;bottom:90px;transform:translateX(-50%);display:none;font-weight:600}
+#help{left:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--mute)}
+#dlg{left:50%;bottom:28px;transform:translateX(-50%);width:min(640px,92vw);display:none;padding:14px 18px}
+#dlg b{color:var(--accent)}#dlg small{color:var(--mute)}
+button{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button.pri{background:var(--accent);color:var(--ai);border-color:var(--accent);font-weight:600}
+button:focus-visible,select:focus-visible,#ed:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+select{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:4px}
+#ov{position:fixed;inset:0;background:rgba(5,10,20,.7);display:none;z-index:5;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px}
+#win{background:var(--panel);border:1px solid var(--line);border-radius:12px;height:100%;max-width:1200px;margin:0 auto;display:grid;grid-template-columns:270px 1fr;grid-template-rows:auto 1fr;overflow:hidden}
+#win>header{grid-column:1/3;display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#side{padding:12px;overflow:auto;border-right:1px solid var(--line);font-size:14px}
+#side dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 8px}#side dt{color:var(--mute)}#side dd{margin:0}
+#main{overflow:auto;background:var(--chip);padding:14px}
+#page{background:#fff;color:#000;width:794px;max-width:none;margin:0 auto;font-family:"Times New Roman",serif;font-size:12pt;line-height:1.5;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+#ed{min-height:900px;outline:none;padding:2.5cm 2.5cm 2.5cm 3cm;white-space:pre-wrap}#ed p{margin:0}
+.chk{display:grid;grid-template-columns:20px 1fr auto;gap:0 6px;padding:5px 0;border-top:1px solid var(--line)}.chk small{grid-column:2/4;color:var(--mute)}
+.ok{color:var(--ok)}.no{color:var(--bad)}
+#fb{display:none;position:fixed;inset:0;place-content:center;text-align:center;padding:20px}
+@media(max-width:800px){#win{grid-template-columns:1fr}#side{display:none}#obj{display:none}}
+</style>
+</head>
+<body>
+<div class="hud" id="top"><b>OFFICEVERSE</b><span id="lv">Trainee</span><span id="xp">0 XP</span><button id="d2">Buka editor (2D)</button></div>
+<div class="hud" id="obj"></div>
+<div class="hud" id="pr"></div>
+<div class="hud" id="help">WASD jalan · seret mouse putar kamera · E interaksi</div>
+<div class="hud" id="dlg"></div>
+<div id="fb"><h2>3D tidak tersedia di perangkat ini</h2><p>Kamu tetap bisa mengerjakan misi lewat editor.</p></div>
+
+<div id="ov"><div id="win">
+<header><b>Misi 001 · Surat undangan rapat</b><span style="flex:1"></span>
+<button data-c="bold"><b>B</b></button><button data-c="italic"><i>I</i></button><button data-c="underline"><u>U</u></button>
+<button data-c="justifyLeft">Kiri</button><button data-c="justifyCenter">Tengah</button><button data-c="justifyFull">Justify</button>
+<button data-c="undo">Urungkan</button>
+<label>Font <select id="fs"><option>10</option><option>11</option><option selected>12</option><option>14</option></select></label>
+<label>Margin kiri <select id="ml"><option value="2">2 cm</option><option value="3" selected>3 cm</option><option value="4">4 cm</option></select></label>
+<button class="pri" id="sub">Kirim ke Bu Rina</button><button id="cl">Tutup</button></header>
+<div id="side"><dl><dt>Nomor</dt><dd>ADM/UND/001/2026</dd><dt>Perihal</dt><dd>Undangan Rapat</dd><dt>Kepada</dt><dd>Seluruh Staf Departemen Administrasi</dd><dt>Acara</dt><dd>Rapat Koordinasi Bulanan</dd><dt>Hari</dt><dd>Senin, 2 November 2026</dd><dt>Waktu</dt><dd>09.00 WIB</dd><dt>Tempat</dt><dd>Ruang Rapat Lantai 2</dd><dt>Agenda</dt><dd>Evaluasi kinerja Oktober</dd><dt>TTD</dt><dd>Rina Kusuma, Manajer Administrasi</dd></dl>
+<p style="color:var(--mute)">Ketentuan: Times New Roman 12 pt, margin kiri 4 cm, isi justify, judul tebal.</p>
+<h3 style="margin:8px 0 0" id="sc"></h3><div id="ls"></div></div>
+<div id="main"><div id="page"><div id="ed" contenteditable="true" spellcheck="false" aria-label="Isi surat"></div></div></div>
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var KEY="officeverse:m001",S={xp:0,best:0,doc:"",fs:12,ml:3,stage:0};
+try{var q=localStorage.getItem(KEY);if(q)Object.assign(S,JSON.parse(q))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function lvl(x){return x>=1500?"Office Manager":x>=800?"Senior Administrator":x>=400?"Office Administrator":x>=150?"Junior Administrator":"Trainee"}
+function hud(){$("xp").textContent=S.xp+" XP";$("lv").textContent=lvl(S.xp);
+ var o=["Temui Bu Rina di lobi","Ke komputer di ruang Administrasi","Misi 001 selesai"],t=["Bicara dengan Bu Rina (E)","Tulis surat undangan di komputer mejamu, ruang kiri belakang","Surat diterima. Tugas berikutnya segera hadir."];
+ $("obj").innerHTML="<b>"+o[S.stage]+"</b><small>"+t[S.stage]+"</small>"}
+hud();
+
+/* ===== Editor surat ===== */
+var ed=$("ed"),page=$("page"),ov=$("ov");
+var starter="<p><b>PT NUSANTARA DIGITAL</b></p><p>Jl. Merdeka No. 10, Jakarta</p><p><br></p><p>Nomor : </p><p>Perihal : </p><p><br></p><p>Yth. </p><p><br></p><p><br></p><p><br></p><p>Hormat kami,</p><p><br></p><p><br></p><p></p>";
+ed.innerHTML=S.doc||starter;
+function fmt(){page.style.fontSize=S.fs+"pt";ed.style.paddingLeft=S.ml+"cm";$("fs").value=S.fs;$("ml").value=S.ml}fmt();
+var tm;ed.oninput=function(){clearTimeout(tm);tm=setTimeout(function(){S.doc=ed.innerHTML;save()},400)};
+document.querySelectorAll("[data-c]").forEach(function(b){b.onmousedown=function(e){e.preventDefault()};b.onclick=function(){ed.focus();document.execCommand(b.dataset.c);ed.oninput()}});
+$("fs").onchange=function(e){S.fs=+e.target.value;fmt();save()};$("ml").onchange=function(e){S.ml=+e.target.value;fmt();save()};
+var MO="Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember";
+function grade(){var t=ed.innerText,h=ed.innerHTML,r=[];
+ function a(p,ok,n,g,b){r.push({p:p,ok:ok,n:n,m:ok?g:b})}
+ a(15,/ADM\/UND\/001\/2026/i.test(t),"Nomor surat","Nomor sesuai.","Tulis ADM/UND/001/2026 setelah “Nomor :”.");
+ a(10,/perihal\s*:?\s*undangan/i.test(t),"Perihal","Perihal sesuai.","Isi perihal: Undangan Rapat.");
+ a(10,new RegExp("\\d{1,2}\\s+("+MO+")\\s+\\d{4}","i").test(t),"Tanggal","Format tanggal benar.","Tulis tanggal lengkap, mis. 2 November 2026.");
+ a(10,/yth\.?\s*\S+/i.test(t)&&/administrasi/i.test(t),"Penerima","Penerima ada.","Tulis Yth. Seluruh Staf Departemen Administrasi.");
+ var d=[/senin/i.test(t),/pukul|09[.:]00/i.test(t),/ruang rapat/i.test(t),/agenda|evaluasi/i.test(t)];
+ a(20,d.every(Boolean),"Isi undangan","Hari, waktu, tempat, agenda lengkap.","Kurang: "+["hari","waktu","tempat","agenda"].filter(function(_,i){return !d[i]}).join(", ")+".");
+ a(10,/hormat kami/i.test(t),"Salam penutup","Salam penutup ada.","Tambahkan “Hormat kami,”.");
+ a(5,/rina\s+kusuma/i.test(t.split(/hormat kami,?/i)[1]||""),"Penandatangan","Nama penandatangan ada.","Tulis Rina Kusuma di bawah salam penutup.");
+ a(5,S.fs===12,"Font 12 pt","Ukuran sesuai.","Ubah font ke 12 (sekarang "+S.fs+").");
+ a(5,S.ml===4,"Margin kiri 4 cm","Margin sesuai.","Ubah margin kiri ke 4 cm (sekarang "+S.ml+").");
+ a(5,/text-align:\s*justify/i.test(h),"Justify","Isi sudah justify.","Blok isi surat, klik Justify.");
+ a(5,/<(b|strong)>[^<]*(undangan|perihal)/i.test(h),"Judul tebal","Judul tebal.","Cetak tebal baris Perihal.");
+ return r}
+$("sub").onclick=function(){var r=grade(),tot=r.reduce(function(a,x){return a+(x.ok?x.p:0)},0),g=0;
+ if(tot>S.best){g=Math.round((tot-S.best)*1.5);S.xp+=g;S.best=tot}
+ if(tot>=75&&S.stage<2){S.stage=2;toast("Misi 001 selesai! +"+g+" XP")}
+ $("sc").textContent="Skor "+tot+"/100 "+(tot>=75?"· Lulus":"· Belum lulus (min 75)")+(g?" · +"+g+" XP":"");
+ var L=$("ls");L.innerHTML="";r.forEach(function(x){var e=document.createElement("div");e.className="chk";e.innerHTML='<span class="'+(x.ok?"ok":"no")+'">'+(x.ok?"✓":"✗")+"</span><span></span><span>"+(x.ok?x.p:0)+"/"+x.p+"</span><small></small>";e.children[1].textContent=x.n;e.children[3].textContent=x.m;L.appendChild(e)});
+ save();hud()};
+function openEd(){ov.style.display="block";ed.focus()}
+$("cl").onclick=function(){ov.style.display="none"};
+$("d2").onclick=openEd;
+function toast(t){var e=$("pr");e.textContent=t;e.style.display="block";setTimeout(function(){e.style.display="none"},3000)}
+
+/* ===== Dunia 3D ===== */
+var R;try{R=new THREE.WebGLRenderer({antialias:true});if(!R.getContext())throw 0}catch(e){$("fb").style.display="grid";$("help").style.display="none";return}
+R.setPixelRatio(Math.min(devicePixelRatio,1.75));R.setSize(innerWidth,innerHeight);R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.appendChild(R.domElement);
+var scene=new THREE.Scene();scene.background=new THREE.Color(0x0d1626);scene.fog=new THREE.Fog(0x0d1626,28,60);
+var cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,100);
+scene.add(new THREE.HemisphereLight(0xdbeafe,0x334155,.75));
+var sun=new THREE.DirectionalLight(0xfff4e0,.8);sun.position.set(10,22,12);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+var sc=sun.shadow.camera;sc.left=-24;sc.right=24;sc.top=20;sc.bottom=-20;sc.far=60;scene.add(sun);
+var obst=[];
+function M(c,r){return new THREE.MeshStandardMaterial({color:c,roughness:r==null?.8:r})}
+function box(w,h,d,x,y,z,c,solid,par,mat){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat||M(c));m.position.set(x,y+h/2,z);m.castShadow=m.receiveShadow=true;(par||scene).add(m);if(solid)obst.push({a:x-w/2,b:x+w/2,c:z-d/2,d:z+d/2});return m}
+function label(txt,x,y,z,s){var c=document.createElement("canvas");c.width=512;c.height=96;var g=c.getContext("2d");g.fillStyle="rgba(15,23,42,.75)";g.fillRect(0,0,512,96);g.fillStyle="#fff";g.font="bold 44px Segoe UI,sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText(txt,256,50);
+ var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthWrite:false}));sp.position.set(x,y,z);sp.scale.set(s||4,(s||4)*96/512,1);scene.add(sp);return sp}
+/* lantai per ruangan */
+box(34,.2,26,0,-.2,.5,0x1e293b);
+box(34,.05,13,0,0,6.5,0xd5dde8);           /* lobi */
+box(16.6,.05,11,-8.5,0,-6.5,0x8b6b4a);     /* administrasi */
+box(16.6,.05,11,8.5,0,-6.5,0x475569);      /* rapat */
+/* dinding */
+var WC=0xe8edf3,H=2.4;
+function wall(x0,z0,x1,z1,h){var w=Math.abs(x1-x0)||.3,d=Math.abs(z1-z0)||.3;box(w,h||H,d,(x0+x1)/2,0,(z0+z1)/2,WC,true)}
+wall(-17,-12,17,-12);wall(-17,-12,-17,13);wall(17,-12,17,13);wall(-17,13,17,13,.9);
+wall(-17,-1,-9,-1);wall(-6,-1,6,-1);wall(9,-1,17,-1);wall(0,-12,0,-1);
+/* tanaman */
+function plant(x,z){var p=new THREE.Group();p.position.set(x,0,z);var a=new THREE.Mesh(new THREE.CylinderGeometry(.35,.28,.6,12),M(0x92400e));a.position.y=.3;var b=new THREE.Mesh(new THREE.SphereGeometry(.6,12,10),M(0x16a34a));b.position.y=1.1;a.castShadow=b.castShadow=true;p.add(a,b);scene.add(p);obst.push({a:x-.4,b:x+.4,c:z-.4,d:z+.4})}
+/* meja kerja + monitor + kursi */
+function desk(x,z,ry){var g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry||0;scene.add(g);
+ box(2.4,.1,1.2,0,.75,0,0xb08968,false,g);box(.1,.75,1.1,-1.1,0,0,0x6b4f35,false,g);box(.1,.75,1.1,1.1,0,0,0x6b4f35,false,g);
+ box(.9,.55,.06,0,.9,-.3,0x0f172a,false,g);
+ var scr=new THREE.Mesh(new THREE.PlaneGeometry(.8,.45),new THREE.MeshBasicMaterial({color:0x38bdf8}));scr.position.set(0,1.18,-.265);g.add(scr);
+ box(.8,.04,.3,0,.85,.15,0x1f2937,false,g);box(.6,.5,.6,0,0,.95,0x1e3a8a,false,g);box(.6,.55,.1,0,.5,1.25,0x1e3a8a,false,g);
+ obst.push({a:x-1.3,b:x+1.3,c:z-.7,d:z+.7})}
+/* ruang administrasi */
+desk(-12.5,-8,0);desk(-7.5,-8,0);desk(-12.5,-4,Math.PI);desk(-7.5,-4,Math.PI);
+label("ADMINISTRASI",-8.5,3.1,-1.1,4.4);plant(-16,-11);plant(-1.2,-2);
+/* ruang rapat */
+box(5,.12,2.2,8.5,.8,-7,0x5b3a29,false);box(.3,.8,.3,6.5,0,-7,0x3f2a1e,true);box(.3,.8,.3,10.5,0,-7,0x3f2a1e,true);obst.push({a:6,b:11,c:-8.1,d:-5.9});
+for(var i=0;i<4;i++){box(.6,.5,.6,6.9+i*1.3,0,-8.6,0x0ea5e9);box(.6,.5,.6,6.9+i*1.3,0,-5.4,0x0ea5e9)}
+box(5,2,.1,8.5,.5,-11.8,0xf8fafc);label("RUANG RAPAT",8.5,3.1,-1.1,4.4);plant(16,-11);
+/* arsip (lobi kanan) */
+for(var s=0;s<4;s++){box(2,2.2,.6,10.5+s*1.9,0,12.2,0x64748b,true);for(var f=0;f<6;f++)box(.22,.35,.4,9.8+s*1.9+f*.25,.4+(f%3)*.6,12.1,[0xef4444,0xf59e0b,0x3b82f6,0x22c55e][(f+s)%4])}
+label("RUANG ARSIP",13,3.1,11.4,4.2);
+/* resepsionis */
+box(4,1.1,1,0,0,9.6,0x1e3a8a,true);box(4.2,.08,1.2,0,1.1,9.6,0xf8fafc);label("RESEPSIONIS",0,2.2,9.6,3.6);
+plant(-15.5,12);plant(-15.5,2);plant(15.5,2);
+label("PT NUSANTARA DIGITAL",0,3.6,-.9,6);
+/* karakter */
+function person(sh,hair,skin){var g=new THREE.Group(),c=M;
+ var lg=[],i;for(i=-1;i<2;i+=2){var l=new THREE.Mesh(new THREE.BoxGeometry(.22,.6,.25),c(0x1f2937));l.geometry.translate(0,-.3,0);l.position.set(i*.16,.62,0);l.castShadow=true;g.add(l);lg.push(l)}
+ var t=new THREE.Mesh(new THREE.BoxGeometry(.56,.65,.32),c(sh));t.position.y=.95;t.castShadow=true;g.add(t);
+ var ar=[];for(i=-1;i<2;i+=2){var a=new THREE.Mesh(new THREE.BoxGeometry(.14,.55,.14),c(sh));a.geometry.translate(0,-.25,0);a.position.set(i*.38,1.2,0);a.castShadow=true;g.add(a);ar.push(a)}
+ var h=new THREE.Mesh(new THREE.SphereGeometry(.24,16,12),c(skin||0xf1c9a5));h.position.y=1.5;h.castShadow=true;g.add(h);
+ var hr=new THREE.Mesh(new THREE.SphereGeometry(.26,16,12,0,Math.PI*2,0,Math.PI/2),c(hair));hr.position.y=1.53;g.add(hr);
+ g.userData={lg:lg,ar:ar};scene.add(g);return g}
+var me=person(0x2563eb,0x1c1917);me.position.set(0,0,11.5);
+var rina=person(0xdb2777,0x3b1d0f,0xe8b98f);rina.position.set(-4,0,5);rina.rotation.y=Math.PI*.6;obst.push({a:-4.4,b:-3.6,c:4.6,d:5.4});
+label("Bu Rina · Manajer",-4,2.3,5,2.6);
+var mk=(function(){var c=document.createElement("canvas");c.width=c.height=64;var g=c.getContext("2d");g.fillStyle="#f59e0b";g.beginPath();g.arc(32,32,30,0,7);g.fill();g.fillStyle="#111";g.font="bold 44px sans-serif";g.textAlign="center";g.fillText("!",32,47);
+ var s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));s.scale.set(.7,.7,1);scene.add(s);return s})();
+var PC={x:-12.5,z:-7.1};
+/* kontrol */
+var keys={},yaw=0,drag=false,lx=0;
+addEventListener("keydown",function(e){if(ov.style.display==="block")return;keys[e.code]=1;if(e.code==="KeyE"||e.code==="Space")act()});
+addEventListener("keyup",function(e){keys[e.code]=0});
+R.domElement.onpointerdown=function(e){drag=true;lx=e.clientX};addEventListener("pointerup",function(){drag=false});
+addEventListener("pointermove",function(e){if(drag){yaw-=(e.clientX-lx)*.006;lx=e.clientX}});
+addEventListener("resize",function(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()});
+/* dialog */
+var D=$("dlg"),dl=null,di=0;
+var TALK=[["Selamat datang di PT Nusantara Digital! Aku Rina, Manajer Administrasi.","Hari ini kita menyiapkan rapat koordinasi bulanan. Tolong buatkan surat undangannya.","Datanya ada di komputer mejamu, ruang Administrasi (kiri belakang). Tekan E di depan komputer."],["Komputermu di ruang Administrasi, lewat pintu kiri. Tekan E di depan komputer."],["Suratmu sudah kuterima. Kerja bagus! Tugas berikutnya akan segera siap."]];
+function say(){D.style.display="block";D.innerHTML="<b>Bu Rina</b><br>"+dl[di]+"<br><small>E / Spasi: lanjut</small>"}
+function dist(x,z){return Math.hypot(me.position.x-x,me.position.z-z)}
+function near(){if(dist(-4,5)<2.6)return"rina";if(S.stage>=1&&dist(PC.x,PC.z)<2.2)return"pc";return null}
+function act(){if(dl){di++;if(di>=dl.length){dl=null;D.style.display="none";if(S.stage===0){S.stage=1;save();hud()}}else say();return}
+ var n=near();if(n==="rina"){dl=TALK[S.stage];di=0;say()}else if(n==="pc"){openEd();keys={}}}
+/* loop */
+var clk=new THREE.Clock(),tt=0,cp=new THREE.Vector3();
+function blocked(x,z){if(x<-16.5||x>16.5||z<-11.5||z>12.6)return true;for(var i=0;i<obst.length;i++){var o=obst[i];if(x>o.a-.35&&x<o.b+.35&&z>o.c-.35&&z<o.d+.35)return true}return false}
+function loop(){requestAnimationFrame(loop);var dt=Math.min(clk.getDelta(),.05);tt+=dt;
+ var f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),r=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
+ if(dl)f=r=0;
+ var mx=-Math.sin(yaw)*f+Math.cos(yaw)*r,mz=-Math.cos(yaw)*f-Math.sin(yaw)*r,m=Math.hypot(mx,mz),u=me.userData;
+ if(m>0){mx/=m;mz/=m;var nx=me.position.x+mx*5*dt,nz=me.position.z+mz*5*dt;if(!blocked(nx,me.position.z))me.position.x=nx;if(!blocked(me.position.x,nz))me.position.z=nz;
+  var ty=Math.atan2(mx,mz),dd=((ty-me.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;me.rotation.y+=dd*Math.min(1,dt*12);
+  var w=Math.sin(tt*10)*.7;u.lg[0].rotation.x=w;u.lg[1].rotation.x=-w;u.ar[0].rotation.x=-w;u.ar[1].rotation.x=w}
+ else{u.lg[0].rotation.x=u.lg[1].rotation.x=u.ar[0].rotation.x=u.ar[1].rotation.x=0}
+ var tx=me.position.x+Math.sin(yaw)*9,tz=me.position.z+Math.cos(yaw)*9;cp.set(tx,10,tz);cam.position.lerp(cp,Math.min(1,dt*6));cam.lookAt(me.position.x,1,me.position.z);
+ var tg=S.stage===0?[-4,5]:S.stage===1?[PC.x,PC.z]:null;mk.visible=!!tg;if(tg)mk.position.set(tg[0],2.9+Math.sin(tt*3)*.15,tg[1]);
+ var n=near(),p=$("pr");if(n&&!dl&&ov.style.display!=="block"){p.style.display="block";p.textContent=n==="rina"?"E · Bicara dengan Bu Rina":"E · Pakai komputer"}else if(!/diterima|selesai/.test(p.textContent)||p.style.display==="none"){p.style.display="none"}
+ R.render(scene,cam)}
+cam.position.set(0,10,20);loop();
+})();
+</script>
+</body>
+</html>
